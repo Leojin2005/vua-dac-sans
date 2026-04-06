@@ -110,10 +110,7 @@ router.post("/forgot-password", async (req, res) => {
     user.passwordResetExpires = Date.now() + 60 * 60 * 1000; // 1 giờ
     await user.save();
 
-    // Chỉ gửi nếu email đã xác minh (email thật), tránh bounce mail
-    if (user.isEmailVerified) {
-      try { await sendPasswordResetEmail(user, rawToken); } catch (e) { console.error("Email lỗi:", e.message); }
-    }
+    try { await sendPasswordResetEmail(user, rawToken); } catch (e) { console.error("Email lỗi:", e.message); }
     // Luôn trả về thông báo thành công để không lộ thông tin tài khoản
     res.json({ message: "Nếu email tồn tại, liên kết đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư." });
   } catch (e) { res.status(500).json({ message: e.message }); }
