@@ -69,9 +69,7 @@ router.put("/:id", protect, admin, upload.single("image"), async (req, res) => {
   try {
     const data = { ...req.body };
     if (req.file) {
-      console.log("FILE:", JSON.stringify(req.file));
       data.image = getImageUrl(req.file);
-      console.log("IMAGE URL:", data.image);
     }
     const p = await Product.findByIdAndUpdate(req.params.id, data, { new: true });
     res.json(p);

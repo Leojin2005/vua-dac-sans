@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { FiTrash2, FiMinus, FiPlus } from "react-icons/fi";
+import { getImageUrl } from "../utils/imageUrl";
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart, subtotal } = useCart();
@@ -21,7 +22,7 @@ export default function Cart() {
           {cart.map(item => (
             <div key={item._id} className="card" style={{ display: "flex", gap: 16, padding: 16, marginBottom: 12 }}>
               <div style={{ width: 100, height: 100, background: "#f0f0f0", borderRadius: 8, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {item.image ? <img src={`http://localhost:5000${item.image}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8 }} /> : <span style={{ fontSize: 32 }}>🎁</span>}
+                {item.image ? <img src={getImageUrl(item.image)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8 }} /> : <span style={{ fontSize: 32 }}>🎁</span>}
               </div>
               <div style={{ flex: 1 }}>
                 <Link to={`/products/${item._id}`} style={{ fontWeight: 600, fontSize: 15 }}>{item.name}</Link>

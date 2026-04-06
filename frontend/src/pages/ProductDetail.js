@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { FiStar, FiMinus, FiPlus, FiShoppingCart } from "react-icons/fi";
+import { getImageUrl } from "../utils/imageUrl";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -42,7 +43,7 @@ export default function ProductDetail() {
       <div className="card" style={{ padding: 32 }}>
         <div className="grid-2">
           <div style={{ height: 400, background: "#f0f0f0", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {p.image ? <img src={`http://localhost:5000${p.image}`} alt={p.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} /> : <span style={{ fontSize: 80 }}>🎁</span>}
+            {p.image ? <img src={getImageUrl(p.image)} alt={p.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} /> : <span style={{ fontSize: 80 }}>🎁</span>}
           </div>
           <div>
             <div style={{ color: "var(--primary)", fontWeight: 600, fontSize: 14, marginBottom: 8 }}>📍 {p.region?.name}</div>
