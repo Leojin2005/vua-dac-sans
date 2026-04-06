@@ -1,25 +1,14 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    family: 4,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const FROM = "Vua Đặc Sản <onboarding@resend.dev>";
 
 const sendVerificationEmail = async (user, token) => {
-  const transporter = createTransporter();
   const verifyUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/verify-email/${token}`;
 
-  await transporter.sendMail({
-    from: `"Vua Đặc Sản" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: FROM,
     to: user.email,
     subject: "Xác minh email tài khoản - Vua Đặc Sản",
     html: `
@@ -48,11 +37,10 @@ const sendVerificationEmail = async (user, token) => {
 };
 
 const sendPasswordResetEmail = async (user, token) => {
-  const transporter = createTransporter();
   const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password/${token}`;
 
-  await transporter.sendMail({
-    from: `"Vua Đặc Sản" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: FROM,
     to: user.email,
     subject: "Đặt lại mật khẩu - Vua Đặc Sản",
     html: `
@@ -81,7 +69,6 @@ const sendPasswordResetEmail = async (user, token) => {
 };
 
 const sendCouponEmail = async (toEmail, toName, coupon) => {
-  const transporter = createTransporter();
   const discountText = coupon.discountType === "percent"
     ? `${coupon.discountValue}%`
     : `${coupon.discountValue.toLocaleString("vi-VN")}đ`;
@@ -90,8 +77,8 @@ const sendCouponEmail = async (toEmail, toName, coupon) => {
     : "Không yêu cầu đơn tối thiểu";
   const expiresText = new Date(coupon.expiresAt).toLocaleDateString("vi-VN");
 
-  await transporter.sendMail({
-    from: `"Vua Đặc Sản" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: FROM,
     to: toEmail,
     subject: `🎁 Mã giảm giá dành riêng cho bạn - Vua Đặc Sản`,
     html: `
