@@ -47,8 +47,10 @@ router.get("/:id", async (req, res) => {
 
 const getImageUrl = (file) => {
   if (!file) return null;
-  // Cloudinary trả về file.path là URL đầy đủ (https)
-  if (file.path && file.path.startsWith("http")) return file.path;
+  if (file.path && file.path.startsWith("http")) {
+    // Đảm bảo luôn dùng https
+    return file.path.replace("http://", "https://");
+  }
   return `/uploads/${file.filename}`;
 };
 
