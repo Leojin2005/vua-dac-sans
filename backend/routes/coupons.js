@@ -58,7 +58,11 @@ router.post("/:id/send", protect, admin, async (req, res) => {
       try {
         await sendCouponEmail(r.email, r.name, coupon);
         sent++;
-      } catch { failed++; }
+        console.log("Gửi OK:", r.email);
+      } catch (err) {
+        failed++;
+        console.error("Gửi FAIL:", r.email, err.message);
+      }
     }
 
     res.json({ message: `Đã gửi thành công ${sent} email${failed ? `, thất bại ${failed}` : ""}`, sent, failed });

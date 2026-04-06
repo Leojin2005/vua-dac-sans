@@ -1,13 +1,20 @@
-const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  auth: {
+    user: process.env.BREVO_SMTP_LOGIN,
+    pass: process.env.BREVO_SMTP_PASSWORD,
+  },
+});
 
-const FROM = "Vua Đặc Sản <onboarding@resend.dev>";
+const FROM = `"Vua Đặc Sản" <${process.env.BREVO_SENDER_EMAIL}>`;
 
 const sendVerificationEmail = async (user, token) => {
   const verifyUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/verify-email/${token}`;
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: FROM,
     to: user.email,
     subject: "Xác minh email tài khoản - Vua Đặc Sản",
@@ -39,7 +46,7 @@ const sendVerificationEmail = async (user, token) => {
 const sendPasswordResetEmail = async (user, token) => {
   const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password/${token}`;
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: FROM,
     to: user.email,
     subject: "Đặt lại mật khẩu - Vua Đặc Sản",
@@ -77,7 +84,7 @@ const sendCouponEmail = async (toEmail, toName, coupon) => {
     : "Không yêu cầu đơn tối thiểu";
   const expiresText = new Date(coupon.expiresAt).toLocaleDateString("vi-VN");
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: FROM,
     to: toEmail,
     subject: `🎁 Mã giảm giá dành riêng cho bạn - Vua Đặc Sản`,
