@@ -45,11 +45,18 @@ router.get("/:id", async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
+const getImageUrl = (file) => {
+  if (!file) return null;
+  // Cloudinary trả về file.path là URL đầy đủ (https)
+  if (file.path && file.path.startsWith("http")) return file.path;
+  return `/uploads/${file.filename}`;
+};
+
 // POST create product (admin)
 router.post("/", protect, admin, upload.single("image"), async (req, res) => {
   try {
     const data = { ...req.body };
-    if (req.file) data.image = `/uploads/${req.file.filename}`;
+    if (req.file) data.image = getImageUrl(req.file);
     const p = await Product.create(data);
     res.status(201).json(p);
   } catch (e) { res.status(500).json({ message: e.message }); }
@@ -59,7 +66,7 @@ router.post("/", protect, admin, upload.single("image"), async (req, res) => {
 router.put("/:id", protect, admin, upload.single("image"), async (req, res) => {
   try {
     const data = { ...req.body };
-    if (req.file) data.image = `/uploads/${req.file.filename}`;
+    if (req.file) data.image = getImageUrl(req.file);
     const p = await Product.findByIdAndUpdate(req.params.id, data, { new: true });
     res.json(p);
   } catch (e) { res.status(500).json({ message: e.message }); }
