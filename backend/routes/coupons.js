@@ -41,9 +41,9 @@ router.post("/:id/send", protect, admin, async (req, res) => {
     let recipients = [];
 
     if (sendTo === "all") {
-      recipients = await User.find({ role: "customer", status: "active", isEmailVerified: true }).select("name email");
+      recipients = await User.find({ role: "customer", status: "active" }).select("name email");
     } else if (sendTo === "selected" && emails?.length) {
-      recipients = await User.find({ email: { $in: emails }, status: "active", isEmailVerified: true }).select("name email");
+      recipients = await User.find({ email: { $in: emails }, status: "active" }).select("name email");
       // Thêm email không có tài khoản
       const existingEmails = recipients.map(u => u.email);
       emails.forEach(e => {
