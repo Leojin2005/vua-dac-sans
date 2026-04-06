@@ -53,19 +53,14 @@ router.post("/:id/send", protect, admin, async (req, res) => {
 
     if (!recipients.length) return res.status(400).json({ message: "Không có khách hàng nào để gửi" });
 
-    let sent = 0, failed = 0;
-    for (const r of recipients) {
-      try {
-        await sendCouponEmail(r.email, r.name, coupon);
-        sent++;
-        console.log("Gửi OK:", r.email);
-      } catch (err) {
-        failed++;
-        console.error("Gửi FAIL:", r.email, err.message);
-      }
-    }
+    // Trả về ngay, gửi email nền
+    res.json({ message: `Đang gửi mã đến ${recipients.length} khách hàng...`, sent: recipients.length, failed: 0 });
 
-    res.json({ message: `Đã gửi thành công ${sent} email${failed ? `, thất bại ${failed}` : ""}`, sent, failed });
+    for (const r of recipients) {
+      sendCouponEmail(r.email, r.name, coupon)
+        .then(() => console.log("Gửi OK:", r.email))
+        .catch(err => console.error("Gửi FAIL:", r.email, err.message));
+    }
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
