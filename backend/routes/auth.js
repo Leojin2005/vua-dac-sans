@@ -26,11 +26,7 @@ router.post("/register", async (req, res) => {
       emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
     });
 
-    try {
-      await sendVerificationEmail(user, rawToken);
-    } catch (emailErr) {
-      console.error("Lỗi gửi email xác minh:", emailErr.message);
-    }
+    sendVerificationEmail(user, rawToken).catch(e => console.error("Lỗi gửi email xác minh:", e.message));
 
     res.status(201).json({
       message: "Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản.",
@@ -93,7 +89,7 @@ router.post("/resend-verification", async (req, res) => {
     user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
     await user.save();
 
-    try { await sendVerificationEmail(user, rawToken); } catch (e) { console.error("Email lỗi:", e.message); }
+    sendVerificationEmail(user, rawToken).catch(e => console.error("Email lỗi:", e.message));
     res.json({ message: "Email xác minh đã được gửi lại. Vui lòng kiểm tra hộp thư." });
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
@@ -110,7 +106,7 @@ router.post("/forgot-password", async (req, res) => {
     user.passwordResetExpires = Date.now() + 60 * 60 * 1000; // 1 giờ
     await user.save();
 
-    try { await sendPasswordResetEmail(user, rawToken); } catch (e) { console.error("Email lỗi:", e.message); }
+    sendPasswordResetEmail(user, rawToken).catch(e => console.error("Email lỗi:", e.message));
     // Luôn trả về thông báo thành công để không lộ thông tin tài khoản
     res.json({ message: "Nếu email tồn tại, liên kết đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư." });
   } catch (e) { res.status(500).json({ message: e.message }); }
