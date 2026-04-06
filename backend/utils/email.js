@@ -1,22 +1,43 @@
-const nodemailer = require("nodemailer");
+const https = require("https");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  auth: {
-    user: process.env.BREVO_SMTP_LOGIN,
-    pass: process.env.BREVO_SMTP_PASSWORD,
-  },
-});
+const sendBrevoEmail = ({ to, toName, subject, html }) => {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({
+      sender: { name: "Vua Đặc Sản", email: "leomine2135@gmail.com" },
+      to: [{ email: to, name: toName || to }],
+      subject,
+      htmlContent: html,
+    });
 
-const FROM = `"Vua Đặc Sản" <${process.env.BREVO_SENDER_EMAIL}>`;
+    const req = https.request({
+      hostname: "api.brevo.com",
+      path: "/v3/smtp/email",
+      method: "POST",
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(body),
+      },
+    }, (res) => {
+      let data = "";
+      res.on("data", chunk => data += chunk);
+      res.on("end", () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) resolve(data);
+        else reject(new Error(`Brevo API error ${res.statusCode}: ${data}`));
+      });
+    });
+
+    req.on("error", reject);
+    req.write(body);
+    req.end();
+  });
+};
 
 const sendVerificationEmail = async (user, token) => {
   const verifyUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/verify-email/${token}`;
-
-  await transporter.sendMail({
-    from: FROM,
+  await sendBrevoEmail({
     to: user.email,
+    toName: user.name,
     subject: "Xác minh email tài khoản - Vua Đặc Sản",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -45,10 +66,9 @@ const sendVerificationEmail = async (user, token) => {
 
 const sendPasswordResetEmail = async (user, token) => {
   const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password/${token}`;
-
-  await transporter.sendMail({
-    from: FROM,
+  await sendBrevoEmail({
     to: user.email,
+    toName: user.name,
     subject: "Đặt lại mật khẩu - Vua Đặc Sản",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -84,9 +104,9 @@ const sendCouponEmail = async (toEmail, toName, coupon) => {
     : "Không yêu cầu đơn tối thiểu";
   const expiresText = new Date(coupon.expiresAt).toLocaleDateString("vi-VN");
 
-  await transporter.sendMail({
-    from: FROM,
+  await sendBrevoEmail({
     to: toEmail,
+    toName,
     subject: `🎁 Mã giảm giá dành riêng cho bạn - Vua Đặc Sản`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
