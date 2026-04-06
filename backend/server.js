@@ -3,9 +3,13 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const path = require("path");
+const fs = require("fs");
 
 dotenv.config();
 connectDB();
+
+// Tạo thư mục uploads nếu chưa có (fallback khi không dùng Cloudinary)
+if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
 
 const app = express();
 app.use(cors());
