@@ -22,7 +22,6 @@ app.use("/api/regions", require("./routes/regions"));
 app.use("/api/categories", require("./routes/categories"));
 app.use("/api/products", require("./routes/products"));
 app.use("/api/orders", require("./routes/orders"));
-app.use("/api/coupons", require("./routes/coupons"));
 app.use("/api/dashboard", require("./routes/dashboard"));
 
 app.get("/", (req, res) => res.send("Vua Đặc Sản API Running"));

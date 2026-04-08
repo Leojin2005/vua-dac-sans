@@ -1,13 +1,12 @@
 const router = require("express").Router();
 const Order = require("../models/Order");
 const Product = require("../models/Product");
-const Coupon = require("../models/Coupon");
-const { protect, admin } = require("../middleware/auth");
+const { protect, admin, customerOnly } = require("../middleware/auth");
 
 // POST create order
-router.post("/", protect, async (req, res) => {
+router.post("/", protect, customerOnly, async (req, res) => {
   try {
-    const { items, shippingAddress, paymentMethod, couponCode } = req.body;
+    const { items, shippingAddress, paymentMethod } = req.body;
     if (!items || items.length === 0) return res.status(400).json({ message: "Giỏ hàng trống" });
 
     let subtotal = 0;
@@ -23,23 +22,12 @@ router.post("/", protect, async (req, res) => {
       await prod.save();
     }
 
-    let discount = 0;
-    if (couponCode) {
-      const cp = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true, expiresAt: { $gt: new Date() } });
-      if (cp && cp.usedCount < cp.usageLimit && subtotal >= cp.minOrder) {
-        discount = cp.discountType === "percent" ? subtotal * cp.discountValue / 100 : cp.discountValue;
-        if (cp.maxDiscount > 0 && discount > cp.maxDiscount) discount = cp.maxDiscount;
-        cp.usedCount += 1;
-        await cp.save();
-      }
-    }
-
     const shippingFee = subtotal >= 500000 ? 0 : 30000;
-    const totalPrice = subtotal - discount + shippingFee;
+    const totalPrice = subtotal + shippingFee;
 
     const order = await Order.create({
       user: req.user._id, items: orderItems, shippingAddress, paymentMethod,
-      subtotal, discount, shippingFee, totalPrice, couponCode: couponCode || "",
+      subtotal, discount: 0, shippingFee, totalPrice,
     });
     res.status(201).json(order);
   } catch (e) { res.status(500).json({ message: e.message }); }

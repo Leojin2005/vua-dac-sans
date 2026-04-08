@@ -6,7 +6,6 @@ const User = require("./models/User");
 const Region = require("./models/Region");
 const Category = require("./models/Category");
 const Product = require("./models/Product");
-const Coupon = require("./models/Coupon");
 
 const seedDB = async () => {
   await mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/vuadacsan");
@@ -17,7 +16,6 @@ const seedDB = async () => {
   await Region.deleteMany();
   await Category.deleteMany();
   await Product.deleteMany();
-  await Coupon.deleteMany();
 
   // Users
   const admin = await User.create({ name: "Admin Đức Quyền", email: "admin@vuadacsan.vn", phone: "0912345678", password: "admin123", role: "admin" });
@@ -70,14 +68,6 @@ const seedDB = async () => {
   ];
   await Product.insertMany(products);
   console.log("Products seeded");
-
-  // Coupons
-  await Coupon.insertMany([
-    { code: "WELCOME10", discountType: "percent", discountValue: 10, minOrder: 200000, maxDiscount: 50000, usageLimit: 1000, expiresAt: new Date("2026-12-31") },
-    { code: "DACSAN50K", discountType: "fixed", discountValue: 50000, minOrder: 300000, maxDiscount: 50000, usageLimit: 500, expiresAt: new Date("2026-06-30") },
-    { code: "FREESHIP", discountType: "fixed", discountValue: 30000, minOrder: 100000, maxDiscount: 30000, usageLimit: 200, expiresAt: new Date("2026-12-31") },
-  ]);
-  console.log("Coupons seeded");
 
   console.log("\n=== SEED COMPLETE ===");
   console.log("Admin: admin@vuadacsan.vn / admin123");
